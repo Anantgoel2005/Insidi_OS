@@ -4,13 +4,14 @@ import uuid
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user, get_db
 from app.models.event import AttackEvent, EventType
 from app.services.event_processor import process_event
+from app.services.insider import InsiderContext
 
 router = APIRouter()
 
@@ -49,6 +50,21 @@ class IngestEventRequest(BaseModel):
     raw_log: str | None = None
     parsed_data: dict | None = None
     session_id: str | None = None
+    insider: InsiderContext | None = None
+
+    @model_validator(mode="after")
+    def validate_insider_metadata(self):
+        metadata = dict(self.parsed_data or {})
+        metadata.pop("insider_assessment", None)  # Findings are server-generated.
+        if self.insider is not None and "insider" in metadata:
+            raise ValueError("Provide insider context only once")
+        context = self.insider
+        if context is None and "insider" in metadata:
+            context = InsiderContext.model_validate(metadata["insider"])
+        if context is not None:
+            metadata["insider"] = context.model_dump()
+        self.parsed_data = metadata or None
+        return self
 
 
 @router.get("", response_model=EventListOut)
@@ -57,6 +73,7 @@ async def list_events(
     limit: int = Query(100, ge=1, le=500),
     event_type: EventType | None = None,
     source_ip: str | None = None,
+    actor_id: str | None = None,
     honeypot_id: uuid.UUID | None = None,
     min_threat_score: int | None = None,
     session_id: str | None = None,
@@ -68,6 +85,8 @@ async def list_events(
         conditions.append(AttackEvent.event_type == event_type)
     if source_ip:
         conditions.append(AttackEvent.source_ip == source_ip)
+    if actor_id:
+        conditions.append(AttackEvent.parsed_data["insider"]["actor_id"].astext == actor_id)
     if honeypot_id:
         conditions.append(AttackEvent.honeypot_id == honeypot_id)
     if min_threat_score is not None:

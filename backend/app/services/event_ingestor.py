@@ -5,13 +5,18 @@ import logging
 from app.agents.ttp_profiler import classify_ttp
 from app.core.redis_client import redis, STREAMS
 from app.models.event import AttackEvent, EventType
+from app.services.insider import InsiderContext, assess_insider
 
 logger = logging.getLogger(__name__)
 
 
 async def enrich_event(event: AttackEvent, *, use_llm: bool = True) -> None:
+    context = (event.parsed_data or {}).get("insider")
+    if context is not None:
+        # Validate before the best-effort stream block; invalid telemetry must fail.
+        assess_insider(event, InsiderContext.model_validate(context))
     try:
-        if event.event_type in (EventType.COMMAND, EventType.SHELL_SPAWN):
+        if context is None and event.event_type in (EventType.COMMAND, EventType.SHELL_SPAWN):
             ttp = await classify_ttp(
                 command_line=event.raw_log or "",
                 raw_log=event.raw_log or "",
@@ -20,7 +25,9 @@ async def enrich_event(event: AttackEvent, *, use_llm: bool = True) -> None:
             event.mitre_technique = ttp.get("technique_id")
             event.mitre_tactic = ttp.get("tactic")
 
-        if event.event_type == EventType.EXPLOIT_ATTEMPT:
+        if context is not None:
+            pass  # Identity-aware scoring above replaces perimeter heuristics.
+        elif event.event_type == EventType.EXPLOIT_ATTEMPT:
             event.threat_score = min(100, event.threat_score + 70)
         elif event.event_type == EventType.LOGIN_SUCCESS:
             event.threat_score = min(100, event.threat_score + 60)

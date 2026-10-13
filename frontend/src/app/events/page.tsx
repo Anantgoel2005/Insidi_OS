@@ -2,18 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { api, type AttackEvent } from "@/lib/api";
+import { InsiderEvidence } from "@/components/insider-evidence";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<AttackEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [ipFilter, setIpFilter] = useState("");
+  const [actorFilter, setActorFilter] = useState("");
   const [showEngagement, setShowEngagement] = useState<string | null>(null);
 
   const load = () => {
     const params: Record<string, string> = { limit: "200" };
     if (filter !== "all") params.event_type = filter;
     if (ipFilter) params.source_ip = ipFilter;
+    if (actorFilter) params.actor_id = actorFilter;
     api.events.list(params).then((r) => {
       setEvents(r.items);
       setLoading(false);
@@ -24,7 +27,7 @@ export default function EventsPage() {
     load();
     const interval = setInterval(load, 6000);
     return () => clearInterval(interval);
-  }, [filter, ipFilter]);
+  }, [filter, ipFilter, actorFilter]);
 
   const decideEngagement = async (honeypotId: string) => {
     setShowEngagement(honeypotId);
@@ -42,11 +45,12 @@ export default function EventsPage() {
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Attack Events</h2>
         <p className="text-sm text-muted-foreground">
-          Real-time attacker activity across all honeypots
+          Decoy activity and insider findings across accounts and devices
         </p>
       </div>
 
       <div className="flex gap-3 items-center flex-wrap">
+        <input value={actorFilter} onChange={(e) => setActorFilter(e.target.value)} aria-label="Filter by account ID" placeholder="Filter by account ID..." className="bg-card border border-border rounded-md px-3 py-2 text-sm w-56" />
         <input
           type="text"
           value={ipFilter}
@@ -64,6 +68,8 @@ export default function EventsPage() {
           <option value="login_attempt">Login Attempt</option>
           <option value="login_success">Login Success</option>
           <option value="command">Command</option>
+          <option value="file_download">File Download</option>
+          <option value="file_upload">File Upload</option>
           <option value="exploit_attempt">Exploit Attempt</option>
           <option value="canary_trip">Canary Trip</option>
         </select>
@@ -119,6 +125,8 @@ export default function EventsPage() {
                       {event.raw_log}
                     </pre>
                   )}
+                  <InsiderEvidence event={event} />
+                  {event.session_id && <a className="mt-2 inline-block text-xs text-primary hover:underline" href={`/investigations/${encodeURIComponent(event.session_id)}`}>Open investigation</a>}
                 </div>
                 <div className="shrink-0 flex flex-col items-end gap-1">
                   <span className="text-[10px] text-muted-foreground">
@@ -144,7 +152,7 @@ export default function EventsPage() {
           ))}
           {events.length === 0 && (
             <div className="text-center text-muted-foreground py-12 text-sm">
-              No events captured. Deploy a honeypot and attackers will find it.
+              No events match these filters. Run a demo or ingest trusted collector telemetry.
             </div>
           )}
         </div>

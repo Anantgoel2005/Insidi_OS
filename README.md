@@ -1,14 +1,15 @@
-# Deception Orchestrator
+# Insider Threat Orchestrator
 
-[![CI](https://github.com/Anantgoel2005/deception-orchestrator/actions/workflows/ci.yml/badge.svg)](https://github.com/Anantgoel2005/deception-orchestrator/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/Anantgoel2005/deception-orchestrator/actions/workflows/codeql.yml/badge.svg)](https://github.com/Anantgoel2005/deception-orchestrator/actions/workflows/codeql.yml)
-[![Release](https://img.shields.io/github/v/release/Anantgoel2005/deception-orchestrator?display_name=tag)](https://github.com/Anantgoel2005/deception-orchestrator/releases)
+[![CI](https://github.com/Anantgoel2005/insider-threat-orchestrator/actions/workflows/ci.yml/badge.svg)](https://github.com/Anantgoel2005/insider-threat-orchestrator/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Anantgoel2005/insider-threat-orchestrator/actions/workflows/codeql.yml/badge.svg)](https://github.com/Anantgoel2005/insider-threat-orchestrator/actions/workflows/codeql.yml)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](backend/requirements.txt)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](frontend/package.json)
 
-> **A self-hostable SOC analyst console for safe deception labs.**
+> **A self-hostable analyst console for employee and administrator insider-threat investigations.**
 
-Deception Orchestrator turns controlled decoy and canary activity into MITRE-tagged events, explainable alerts, and investigation timelines. It is built to demonstrate blue-team workflows without requiring a live attacker or an external LLM.
+Insider Threat Orchestrator combines identity-aware telemetry with controlled decoy and canary activity to produce explainable alerts and investigation timelines for employee data misuse and privileged administrator abuse. It supports deterministic lab demonstrations without requiring a live attacker or an external LLM.
+
+This separate project builds on [Deception Orchestrator](https://github.com/Anantgoel2005/deception-orchestrator) and preserves its development history. See the [insider-threat guide](docs/insider-threats.md) for the new workflows and integration limits.
 
 [Quick start](#quick-start) · [Demo flow](#demo-flow) · [Architecture](#architecture) · [Deployment](#deployment) · [Security](docs/security.md)
 
@@ -35,6 +36,10 @@ Both views above were captured from the bundled offline demo. The workflow gener
 | **URL canaries** | One-time beacon callbacks that generate a critical event and alert. |
 | **Local decoy lab** | Explicit, local-only Docker decoys with a separate log-monitor worker. |
 | **Optional AI enrichment** | DeepSeek can enrich analysis when configured; deterministic offline rules remain the default fallback. |
+| **Insider-threat findings** | Identity-aware rules for employee data misuse and privileged administrator abuse, with account filters and explainable evidence. |
+| **Insider demo scenarios** | Valid internal logins, decoy data access, bulk exports, unapproved transfers, audit disabling, and privilege changes. |
+
+See the [insider-threat guide](docs/insider-threats.md) for collector metadata, detection thresholds, API examples and operational limits. Choose **Employee data misuse** or **Privileged administrator misuse** in Demo Lab to try the workflows.
 
 ## Architecture
 

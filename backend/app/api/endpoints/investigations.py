@@ -24,6 +24,8 @@ class InvestigationEvent(BaseModel):
     threat_score: int
     timestamp: datetime
     simulated: bool
+    username: str | None
+    parsed_data: dict | None
 
 
 class InvestigationOut(BaseModel):
@@ -53,5 +55,6 @@ async def get_investigation(
             raw_log=event.raw_log, mitre_technique=event.mitre_technique,
             mitre_tactic=event.mitre_tactic, threat_score=event.threat_score,
             timestamp=event.timestamp, simulated=bool((event.parsed_data or {}).get("simulated")),
+            username=event.username, parsed_data=event.parsed_data,
         ) for event in events],
     )

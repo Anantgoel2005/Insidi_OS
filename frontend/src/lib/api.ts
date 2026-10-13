@@ -80,7 +80,12 @@ export interface Alert {
   created_at: string;
 }
 
-export interface Investigation { session_id: string; source_ip: string; alert_ids: string[]; events: AttackEvent[]; }
+export interface Investigation {
+  session_id: string;
+  source_ip: string;
+  alert_ids: string[];
+  events: (Pick<AttackEvent, "id" | "event_type" | "source_ip" | "username" | "raw_log" | "parsed_data" | "mitre_technique" | "mitre_tactic" | "threat_score" | "timestamp"> & { simulated: boolean })[];
+}
 
 export interface AttackEvent {
   id: string;
@@ -91,7 +96,10 @@ export interface AttackEvent {
   source_port: number | null;
   username: string | null;
   raw_log: string | null;
-  parsed_data: Record<string, unknown> | null;
+  parsed_data: (Record<string, unknown> & {
+    insider?: { actor_id: string; role: string; resource: string };
+    insider_assessment?: { score: number; findings: { rule: string; reason: string }[] };
+  }) | null;
   mitre_technique: string | null;
   mitre_tactic: string | null;
   threat_score: number;
@@ -161,5 +169,5 @@ export const api = {
       ),
   },
   investigations: { get: (sessionId: string) => request<Investigation>(`/investigations/${sessionId}`) },
-  demo: { run: () => request<{ session_id: string; events_created: number; message: string }>("/demo/run", { method: "POST" }) },
+  demo: { run: (scenario = "credential-to-exfiltration") => request<{ session_id: string; events_created: number; message: string }>("/demo/run", { method: "POST", body: JSON.stringify({ scenario }) }) },
 };

@@ -24,7 +24,12 @@ async def evaluate_event(db: AsyncSession, event: AttackEvent) -> Alert | None:
     else:
         severity = AlertSeverity.HIGH
 
+    insider = (event.parsed_data or {}).get("insider")
+    assessment = (event.parsed_data or {}).get("insider_assessment", {})
     title = f"{event.event_type.value.replace('_', ' ').title()} from {event.source_ip}"
+    if insider:
+        rules = ", ".join(finding["rule"] for finding in assessment.get("findings", [])) or event.event_type.value
+        title = f"Insider activity: {insider['actor_id']} [{rules}]"
     if event.mitre_technique:
         title += f" [{event.mitre_technique}]"
 
@@ -34,6 +39,9 @@ async def evaluate_event(db: AsyncSession, event: AttackEvent) -> Alert | None:
         f"MITRE technique: {event.mitre_technique or 'N/A'}\n"
         f"Raw log: {(event.raw_log or '')[:500]}"
     )
+    if insider:
+        description += "\nAccount: " + insider["actor_id"] + "\nResource: " + insider["resource"]
+        description += "\n" + "\n".join(finding["reason"] for finding in assessment.get("findings", []))
 
     recommendation = _get_recommendation(event)
 
@@ -59,6 +67,8 @@ async def evaluate_event(db: AsyncSession, event: AttackEvent) -> Alert | None:
             "event_type": event.event_type.value,
             "threat_score": event.threat_score,
             "mitre_technique": event.mitre_technique,
+            "insider": insider,
+            "insider_assessment": assessment if insider else None,
         },
     )
     db.add(alert)
@@ -69,6 +79,12 @@ async def evaluate_event(db: AsyncSession, event: AttackEvent) -> Alert | None:
 
 
 def _get_recommendation(event: AttackEvent) -> str:
+    if (event.parsed_data or {}).get("insider"):
+        return (
+            "Preserve identity, resource and destination audit evidence. Correlate this account across devices and sessions. "
+            "Verify business purpose, approved changes and possible account compromise with the responsible owner. "
+            "Treat this as a reviewable finding, not proof of malicious intent. Require analyst approval for containment."
+        )
     if event.event_type.value == "canary_trip":
         return "CRITICAL: A canary token has been tripped. Investigate immediately. Rotate all credentials in the affected scope."
     if event.event_type.value == "exploit_attempt":
