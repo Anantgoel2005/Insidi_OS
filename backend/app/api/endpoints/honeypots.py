@@ -129,6 +129,13 @@ def _deploy_honeypot_background(honeypot_id: uuid.UUID) -> None:
         logger.info("Honeypot %s deployed successfully", honeypot_id)
     except Exception as exc:
         logger.error("Failed to deploy honeypot %s: %s", honeypot_id, exc)
+        # Deployment exceptions roll back the manager's transaction. Persist
+        # the failure separately so the console does not remain "deploying".
+        with Session(engine) as session:
+            failed = session.get(Honeypot, honeypot_id)
+            if failed:
+                failed.status = HoneypotStatus.ERROR
+                session.commit()
     finally:
         engine.dispose()
 

@@ -115,7 +115,7 @@ Docker decoys are disabled by default. Enable them only on a controlled machine:
 docker compose -f docker-compose.yml -f docker-compose.lab.yml up -d --build
 ```
 
-Deploy an SSH decoy from **Local Decoys**, then connect from a VM or device you control on the same lab network. The worker records the resulting connection events in the analyst console.
+Deploy an SSH decoy from **Local Decoys**, then connect from the same machine using its published localhost port. See the [honeypot testing guide](docs/honeypot-testing.md) for SSH credentials, port discovery, expected events and troubleshooting. The worker records the resulting authentication and connection logs in the analyst console.
 
 > [!CAUTION]
 > Do not expose the included lab templates to the public internet. They are intentionally simple, use fake known credentials, and exist only to demonstrate the telemetry workflow.

@@ -1,10 +1,15 @@
 services:
   backend:
+    # Match the socket's group; Docker Desktop uses GID 0. The app stays non-root.
+    group_add:
+      - "${DOCKER_SOCKET_GID:-0}"
     environment:
       ENABLE_LOCAL_DECOYS: "true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   worker:
+    group_add:
+      - "${DOCKER_SOCKET_GID:-0}"
     environment:
       ENABLE_LOCAL_DECOYS: "true"
     volumes:

@@ -8,12 +8,14 @@ export default function HoneypotsPage() {
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState("ssh");
+  const [error, setError] = useState("");
+  const [creating, setCreating] = useState(false);
 
   const load = () => {
     api.honeypots.list({ limit: "100" }).then((r) => {
       setHoneypots(r.items);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((e) => { setLoading(false); setError(e instanceof Error ? e.message : "Unable to load local decoys."); });
   };
 
   useEffect(() => {
@@ -24,22 +26,23 @@ export default function HoneypotsPage() {
 
   const create = async () => {
     if (!newName.trim()) return;
+    setCreating(true); setError("");
     try {
       await api.honeypots.create({
         name: newName,
         honeypot_type: newType as Honeypot["honeypot_type"],
       });
       setNewName("");
-    } catch {
-    }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Deployment failed.");
+    } finally { setCreating(false); }
     load();
   };
 
   const remove = async (id: string) => {
     try {
       await api.honeypots.delete(id);
-    } catch {
-    }
+    } catch (e) { setError(e instanceof Error ? e.message : "Unable to remove decoy."); }
     load();
   };
 
@@ -71,6 +74,8 @@ export default function HoneypotsPage() {
         </div>
       </div>
 
+      {error && <p role="alert" className="rounded-lg border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200">{error}</p>}
+
       <div className="bg-card border border-border rounded-lg p-4 flex gap-3 items-end">
         <div className="flex-1">
           <label className="text-xs text-muted-foreground block mb-1">Name</label>
@@ -98,9 +103,10 @@ export default function HoneypotsPage() {
         </div>
         <button
           onClick={create}
+          disabled={creating || !newName.trim()}
           className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
         >
-          Deploy
+          {creating ? "Deploying…" : "Deploy"}
         </button>
       </div>
 
@@ -123,6 +129,7 @@ export default function HoneypotsPage() {
                 </span>
               </div>
               <div className="space-y-1 text-xs text-muted-foreground">
+                <p className="mb-2">Status: {hp.status}{hp.status === "error" ? " — check backend deployment logs" : ""}</p>
                 <div className="flex justify-between">
                   <span>IP</span>
                   <span className="font-mono">{hp.ip_address || "pending..."}</span>

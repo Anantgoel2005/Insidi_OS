@@ -8,7 +8,7 @@ def build_database_honeypot(docker_client, network_name: str, honeypot):
         name=f"honeypot-db-{honeypot.id.hex[:8]}",
         detach=True,
         network=network_name,
-        ports={"3306/tcp": None},
+        ports={"3306/tcp": ("127.0.0.1", None)},
         environment={
             "MYSQL_ROOT_PASSWORD": "FakeRootPassword123!",
             "MYSQL_DATABASE": f"decoy_{honeypot.id.hex[:6]}",

@@ -8,7 +8,7 @@ def build_http_honeypot(docker_client, network_name: str, honeypot):
         name=f"honeypot-http-{honeypot.id.hex[:8]}",
         detach=True,
         network=network_name,
-        ports={"80/tcp": None, "443/tcp": None},
+        ports={"80/tcp": ("127.0.0.1", None), "443/tcp": ("127.0.0.1", None)},
         environment={
             "HONEYPOT_NAME": honeypot.name,
         },

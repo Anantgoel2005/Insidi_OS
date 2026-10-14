@@ -69,7 +69,13 @@ class HoneypotManager:
 
             honeypot.container_id = container.id
             honeypot.ip_address = ip_addr
-            honeypot.ports = honeypot.ports or self._default_ports(honeypot.honeypot_type.value)
+            bindings = network_settings.get("Ports") or {}
+            published = [
+                f"{binding['HostIp']}:{binding['HostPort']}->{port}"
+                for port, values in sorted(bindings.items())
+                for binding in (values or [])
+            ]
+            honeypot.ports = ", ".join(published) or self._default_ports(honeypot.honeypot_type.value)
             honeypot.status = HoneypotStatus.RUNNING
             db.flush()
 

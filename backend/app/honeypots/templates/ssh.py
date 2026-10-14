@@ -32,7 +32,7 @@ def build_ssh_honeypot(docker_client, network_name: str, honeypot):
         name=f"honeypot-ssh-{honeypot.id.hex[:8]}",
         detach=True,
         network=network_name,
-        ports={"22/tcp": None},
+        ports={"22/tcp": ("127.0.0.1", None)},
         restart_policy={"Name": "unless-stopped"},
     )
     return container
