@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_current_user, get_db
 from app.models.honeypot import Honeypot, HoneypotStatus, HoneypotType
 from app.config import settings
+from app.services.decoy_connections import connection_snapshot
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -42,6 +43,8 @@ class HoneypotOut(BaseModel):
     total_connections: int
     total_commands: int
     unique_attackers: int
+    active_connections: int | None = None
+    connection_tracking: str = "unavailable"
     created_at: datetime
     updated_at: datetime
 
@@ -51,6 +54,12 @@ class HoneypotOut(BaseModel):
 class HoneypotListOut(BaseModel):
     items: list[HoneypotOut]
     total: int
+
+
+async def _output(honeypot: Honeypot) -> HoneypotOut:
+    output = HoneypotOut.model_validate(honeypot)
+    output.active_connections, output.connection_tracking = await connection_snapshot(honeypot)
+    return output
 
 
 @router.get("", response_model=HoneypotListOut)
@@ -81,7 +90,7 @@ async def list_honeypots(
     items = items_result.scalars().all()
 
     return HoneypotListOut(
-        items=[HoneypotOut.model_validate(h) for h in items],
+        items=list(await asyncio.gather(*(_output(h) for h in items))),
         total=total,
     )
 
@@ -109,7 +118,7 @@ async def create_honeypot(
     background_tasks.add_task(_deploy_honeypot_background, honeypot_id)
 
     await db.refresh(honeypot)
-    return HoneypotOut.model_validate(honeypot)
+    return await _output(honeypot)
 
 
 def _deploy_honeypot_background(honeypot_id: uuid.UUID) -> None:
@@ -150,7 +159,7 @@ async def get_honeypot(
     honeypot = result.scalar_one_or_none()
     if not honeypot:
         raise HTTPException(status_code=404, detail="Honeypot not found")
-    return HoneypotOut.model_validate(honeypot)
+    return await _output(honeypot)
 
 
 @router.patch("/{honeypot_id}", response_model=HoneypotOut)
@@ -171,7 +180,7 @@ async def update_honeypot(
 
     await db.flush()
     await db.refresh(honeypot)
-    return HoneypotOut.model_validate(honeypot)
+    return await _output(honeypot)
 
 
 @router.delete("/{honeypot_id}", status_code=status.HTTP_204_NO_CONTENT)

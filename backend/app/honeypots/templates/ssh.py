@@ -12,7 +12,7 @@ RUN apk add --no-cache openssh-server && \
 
 EXPOSE 22
 
-CMD ["/usr/sbin/sshd", "-D", "-e"]
+CMD ["/usr/sbin/sshd", "-D", "-e", "-o", "LogLevel=VERBOSE"]
 """
 
 

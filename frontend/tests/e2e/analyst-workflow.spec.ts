@@ -101,3 +101,26 @@ test("supports pause, manual steps and a fresh replay", async ({ page }) => {
   await expect(page.getByText("Step 0 of 7", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Stop", exact: true }).click();
 });
+
+test("distinguishes current decoy connections, totals and unavailable tracking", async ({ page }) => {
+  await signIn(page);
+  let active: number | null = 1;
+  await page.route("**/api/v1/honeypots?**", (route) => route.fulfill({ json: {
+    total: 1, items: [{
+      id: "connection-test", name: "Connection tracking test", honeypot_type: "ssh", status: "running",
+      container_id: "test", ip_address: "172.28.0.2", ports: "127.0.0.1:32768->22/tcp",
+      total_connections: 3, total_commands: 0, unique_attackers: 2,
+      active_connections: active, connection_tracking: active === null ? "unavailable" : "live",
+      created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+    }],
+  } }));
+  await page.getByRole("link", { name: "Local Decoys", exact: true }).click();
+  const card = page.getByRole("article", { name: "Connection tracking test", exact: true });
+  await expect(card.getByText("Connected · live TCP connections", { exact: true })).toBeVisible();
+  await expect(card.getByText("Total connections observed", { exact: true }).locator("..")).toHaveText("Total connections observed3");
+  active = 0;
+  await expect(card.getByText("No active TCP connections", { exact: true })).toBeVisible({ timeout: 8_000 });
+  active = null;
+  await expect(card.getByText("Docker connection tracking is unavailable", { exact: true })).toBeVisible({ timeout: 8_000 });
+  await expect(card.getByText("Unavailable", { exact: true })).toBeVisible();
+});

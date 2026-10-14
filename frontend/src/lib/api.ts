@@ -48,6 +48,8 @@ export interface Honeypot {
   total_connections: number;
   total_commands: number;
   unique_attackers: number;
+  active_connections: number | null;
+  connection_tracking: "live" | "unavailable" | "disabled" | "inactive";
   created_at: string;
   updated_at: string;
 }

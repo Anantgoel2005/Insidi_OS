@@ -20,7 +20,7 @@ export default function HoneypotsPage() {
 
   useEffect(() => {
     load();
-    const interval = setInterval(load, 8000);
+    const interval = setInterval(load, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -115,8 +115,9 @@ export default function HoneypotsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {honeypots.map((hp) => (
-            <div
+            <article
               key={hp.id}
+              aria-label={hp.name}
               className="bg-card border border-border rounded-lg p-4 hover:border-primary/20 transition-colors"
             >
               <div className="flex items-center justify-between mb-3">
@@ -130,6 +131,10 @@ export default function HoneypotsPage() {
               </div>
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p className="mb-2">Status: {hp.status}{hp.status === "error" ? " — check backend deployment logs" : ""}</p>
+                <div aria-live="polite" className={`mb-3 rounded border p-2 ${hp.active_connections ? "border-emerald-400/30 bg-emerald-400/5 text-emerald-300" : "border-border"}`}>
+                  <div className="flex justify-between"><span>Active connections</span><b>{hp.connection_tracking === "live" ? hp.active_connections : "Unavailable"}</b></div>
+                  <p className="mt-1 text-[10px]">{hp.connection_tracking === "live" ? hp.active_connections ? "Connected · live TCP connections" : "No active TCP connections" : hp.connection_tracking === "disabled" ? "Local-lab tracking is disabled" : hp.connection_tracking === "inactive" ? "Decoy service is not running" : "Docker connection tracking is unavailable"}</p>
+                </div>
                 <div className="flex justify-between">
                   <span>IP</span>
                   <span className="font-mono">{hp.ip_address || "pending..."}</span>
@@ -139,11 +144,11 @@ export default function HoneypotsPage() {
                   <span className="font-mono">{hp.ports || "—"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Connections</span>
+                  <span>Total connections observed</span>
                   <span>{hp.total_connections}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Attackers</span>
+                  <span>Unique source IPs</span>
                   <span>{hp.unique_attackers}</span>
                 </div>
               </div>
@@ -155,7 +160,7 @@ export default function HoneypotsPage() {
                   Remove
                 </button>
               </div>
-            </div>
+            </article>
           ))}
           {honeypots.length === 0 && (
             <div className="col-span-full text-center text-muted-foreground py-12 text-sm">

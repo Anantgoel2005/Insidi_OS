@@ -23,7 +23,11 @@ ssh -p <host-port> root@127.0.0.1
 
 The SSH template uses the intentionally fake lab password `honeypot123`. Try one incorrect password to create a failed-login event, then reconnect with the correct lab password. At the decoy prompt, use `whoami`, `pwd`, and `exit`.
 
-Open **Events** and **Alerts**. The worker checks container logs every five seconds and the console refreshes periodically; allow approximately fifteen seconds. A matched failed password creates `login_attempt`; accepted credentials create `login_success`, which receives score 60 and a high-severity alert in the decoy pipeline. This is different from a legitimate internal login with insider context. Routine commands typed into an SSH session are not captured as a shell-command audit trail by the current sshd template.
+Open **Local Decoys**, **Events** and **Alerts**. Local Decoys refreshes every three seconds. **Active connections** is a live count of established TCP sockets inside the decoy, including connections that have not authenticated. **Total connections observed** is session history reconstructed from SSH endpoint logs; several password attempts in one connection count as one connection. **Unique source IPs** counts observed peers, which can be Docker bridge addresses rather than employee identities. Unavailable Docker monitoring is shown as unavailable, never as a misleading zero.
+
+The worker checks SSH logs every two seconds. It recognizes connection, authentication and disconnection messages, and infers an opening when the first available log is an authentication record. Session IDs link the records for an investigation. Stable log fingerprints stored in PostgreSQL prevent repeated counting after worker restarts or overlapping reads; startup messages are ignored. New SSH containers use verbose logging. Existing decoys also work with their default authentication logs, without restarting an open SSH session.
+
+A matched failed password creates `login_attempt`; accepted credentials create `login_success`, which receives score 60 and a high-severity alert in the decoy pipeline. This is different from a legitimate internal login with insider context. Routine commands typed into an SSH session are not captured as a shell-command audit trail by the current sshd template.
 
 Inspect failures with:
 
