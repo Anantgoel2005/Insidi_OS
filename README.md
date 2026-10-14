@@ -15,7 +15,7 @@ Insidi_OS combines identity-aware telemetry with controlled decoy and canary act
 
 This separate project builds on [Deception Orchestrator](https://github.com/Anantgoel2005/deception-orchestrator) and preserves its development history. See the [insider-threat guide](docs/insider-threats.md) for the new workflows and integration limits.
 
-[Quick start](#quick-start) · [Demo flow](#demo-flow) · [Architecture](#architecture) · [Deployment](#deployment) · [Security](docs/security.md)
+[Install and run](docs/getting-started.md) · [Run tests](docs/testing.md) · [Demo flow](#demo-flow) · [Architecture](#architecture) · [Deployment](#deployment) · [Security](docs/security.md)
 
 > [!WARNING]
 > This is a defensive lab and portfolio project, not an internet-exposed honeypot platform. Run decoys only on systems and networks you own. The hosted control plane never needs Docker socket access.
@@ -74,22 +74,26 @@ See the [architecture and trust-boundary guide](docs/architecture.md) for compon
 
 ### Prerequisites
 
-- Docker Desktop or Docker Engine with Compose v2
-- A free local port `3000` for the console and `8000` for the API
+- Git and Docker Desktop (Linux containers) or Docker Engine with Compose v2
+- Free local ports `3000`, `8000`, `5432`, and `6379`
 
 ### Start the safe control plane
 
 ```bash
+git clone https://github.com/Anantgoel2005/Insidi_OS.git
+cd Insidi_OS
 cp .env.example .env
 # PowerShell: Copy-Item .env.example .env
 
-# Set SECRET_KEY and ADMIN_PASSWORD in .env, then:
-docker compose up --build
+# Set a unique random SECRET_KEY and your ADMIN_PASSWORD in .env, then:
+docker compose up -d --build --wait
 ```
 
 Open [http://localhost:3000](http://localhost:3000), then sign in with the `ADMIN_USERNAME` and `ADMIN_PASSWORD` from `.env`.
 
-The default configuration works offline, and the bundled demo always uses deterministic local MITRE mapping even when an external provider is configured. To enable DeepSeek enrichment for non-demo telemetry, set:
+Follow the [complete installation guide](docs/getting-started.md) for Windows and Linux/macOS commands, secret generation, updates, shutdown, and troubleshooting. The [testing guide](docs/testing.md) covers unit tests, browser tests, and production checks.
+
+After images and dependencies are downloaded, the default configuration supports offline analysis, and the bundled demo always uses deterministic local MITRE mapping even when an external provider is configured. To enable DeepSeek enrichment for non-demo telemetry, set:
 
 ```env
 LLM_PROVIDER=deepseek
@@ -138,6 +142,7 @@ See the [deployment notes](docs/deployment.md), [demo script](docs/demo-script.m
 
 ## API and validation
 
+- [Run tests locally](docs/testing.md): Python unit tests, TypeScript validation, production build, Playwright workflows, and dependency audit, including custom login credentials and troubleshooting.
 - Local OpenAPI docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 - Key routes: `POST /api/v1/auth/login`, `POST /api/v1/demo/run`, `GET /api/v1/investigations/{session_id}`, and public `GET /c/{token}`
 - CI runs backend tests, dependency checks, TypeScript validation, a frontend production build, a production npm audit, and Playwright coverage of login and the end-to-end demo investigation on every pull request.

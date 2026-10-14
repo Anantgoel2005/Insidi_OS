@@ -8,18 +8,33 @@ docker compose -f docker-compose.yml -f docker-compose.lab.yml up -d --build
 
 The overlay mounts Docker's socket and adds its owning group to the non-root backend and worker. Docker Desktop's socket group is normally GID 0. On another host, set `DOCKER_SOCKET_GID` to the socket's actual numeric group before starting the overlay.
 
+On a Linux host using `/var/run/docker.sock`, discover the group and start with it:
+
+```bash
+export DOCKER_SOCKET_GID="$(stat -c '%g' /var/run/docker.sock)"
+docker compose -f docker-compose.yml -f docker-compose.lab.yml up -d --build --wait
+```
+
+For initial cloning and configuration, see [Install and run](getting-started.md).
+
 Deploy an SSH decoy and wait for **running**. Use its published host port, rather than its private container IP or service port 22. The console's Ports field shows mappings such as `127.0.0.1:32768->22/tcp`. Verify the actual binding:
 
 ```powershell
 docker ps --filter name=honeypot --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-docker port <container-name> 22/tcp
+# Replace the example with the SSH container name shown above.
+$decoyName = 'honeypot-ssh-your-id'
+docker port $decoyName 22/tcp
 ```
 
 Connect from the same Windows machine, substituting the reported host port:
 
 ```powershell
-ssh -p <host-port> root@127.0.0.1
+# Replace 32768 with your decoy's actual published host port.
+$decoyPort = 32768
+ssh -p $decoyPort root@127.0.0.1
 ```
+
+On Linux/macOS, use `docker port honeypot-ssh-your-id 22/tcp` with your actual container name, then `ssh -p 32768 root@127.0.0.1` with your actual port.
 
 The SSH template uses the intentionally fake lab password `honeypot123`. Try one incorrect password to create a failed-login event, then reconnect with the correct lab password. At the decoy prompt, use `whoami`, `pwd`, and `exit`.
 
@@ -32,10 +47,10 @@ A matched failed password creates `login_attempt`; accepted credentials create `
 Inspect failures with:
 
 ```powershell
-docker logs <container-name> --tail 30
+docker logs $decoyName --tail 30
 docker compose -f docker-compose.yml -f docker-compose.lab.yml logs --tail=30 backend worker
 ```
 
 New decoy ports bind to `127.0.0.1` for local testing. Their private Docker IPs are not the normal connection target from Windows. A separate VM needs explicitly arranged connectivity to the controlled lab; it cannot use the Windows host's loopback address as its own. Do not publish these simple templates to the internet.
 
-HTTP decoys can be tested with `curl.exe -i http://127.0.0.1:<published-http-port>/`. The current HTTP template is a basic Nginx server, and its logs are not yet normalized with a dedicated HTTP parser. Use SSH authentication events or the live showcase for a reliable detection presentation.
+HTTP decoys can be tested with `curl.exe -i http://127.0.0.1:32769/`, replacing `32769` with the displayed HTTP host port (use `curl` on Linux/macOS). The current HTTP template is a basic Nginx server, and its logs are not yet normalized with a dedicated HTTP parser. Use SSH authentication events or the live showcase for a reliable detection presentation.
