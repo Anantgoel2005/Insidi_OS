@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-ORCHESTRATOR_SYSTEM_PROMPT = """You are the Deception Orchestrator, an AI security agent that manages honeypots, canary tokens, and active cyber deception tactics.
+ORCHESTRATOR_SYSTEM_PROMPT = """You are Insidi_OS, an AI security assistant for insider-threat investigations, honeypots, canary tokens, and controlled cyber deception tactics.
 
 Your capabilities:
 - Analyze attacker TTPs (Tactics, Techniques, Procedures) and map them to MITRE ATT&CK

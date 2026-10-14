@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api, type DashboardStats, type AttackEvent } from "@/lib/api";
+import Link from "next/link";
 import {
   Shield,
   Radio,
@@ -65,11 +66,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Deception Overview</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Insidi_OS Overview</h2>
         <p className="text-sm text-muted-foreground">
-          Real-time honeypot and canary monitoring
+          Identity-aware findings, deception telemetry and insider-threat investigations
         </p>
       </div>
+
+      <Link href="/demo" className="flex items-center justify-between gap-4 rounded-xl border border-cyan-300/25 bg-cyan-300/[.04] p-4"><div><p className="text-sm font-semibold text-cyan-200">Open the live showcase</p><p className="mt-1 text-xs text-muted-foreground">Follow an insider attack from valid access to detection and a sandbox response.</p></div><span className="text-sm text-cyan-300">Launch →</span></Link>
 
       <div className="flex flex-wrap gap-2 text-xs">
         <span className="rounded bg-emerald-500/10 px-2 py-1 text-emerald-400">{stats?.deployment_mode || "checking"} control plane</span>
@@ -105,7 +108,7 @@ export default function DashboardPage() {
         <div className="divide-y divide-border max-h-[480px] overflow-auto">
           {events.length === 0 && (
             <div className="p-8 text-center text-muted-foreground text-sm">
-              No events captured yet. Deploy a honeypot to start monitoring.
+              No events captured yet. Start a live showcase or ingest trusted telemetry.
             </div>
           )}
           {events.map((event) => (

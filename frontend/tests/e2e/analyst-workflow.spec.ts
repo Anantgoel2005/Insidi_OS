@@ -5,22 +5,25 @@ const password = process.env.E2E_ADMIN_PASSWORD ?? "choose-a-local-demo-password
 
 async function signIn(page: Page) {
   await page.goto("/login");
+  await expect(page).toHaveTitle("Insidi_OS");
   await page.getByLabel("Username").fill(username);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("heading", { name: "Deception Overview" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Insidi_OS Overview" })).toBeVisible();
 }
 
 test("protects the console and authenticates an analyst", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/login$/);
+  if (process.env.LOGIN_SCREENSHOT) await page.screenshot({ path: process.env.LOGIN_SCREENSHOT, fullPage: true, animations: "disabled" });
   await signIn(page);
   await expect(page.getByText("Events (24h)")).toBeVisible();
 });
 
 test("runs the deterministic demo and opens its investigation", async ({ page }) => {
   await signIn(page);
-  await page.getByRole("link", { name: "Demo Lab" }).click();
+  await page.getByRole("link", { name: "Live Showcase", exact: true }).click();
+  await page.getByText("Instant investigation generator", { exact: true }).click();
   await page.getByRole("button", { name: "Run safe scenario" }).click();
 
   await expect(page).toHaveURL(/\/investigations\//, { timeout: 15_000 });
@@ -35,7 +38,8 @@ for (const scenario of [
 ]) {
   test(`investigates ${scenario.account} activity`, async ({ page }) => {
     await signIn(page);
-    await page.getByRole("link", { name: "Demo Lab" }).click();
+    await page.getByRole("link", { name: "Live Showcase", exact: true }).click();
+    await page.getByText("Instant investigation generator", { exact: true }).click();
     await page.getByRole("button", { name: scenario.button, exact: true }).click();
     await expect(page).toHaveURL(/\/investigations\//, { timeout: 15_000 });
     await expect(page.getByText(scenario.account, { exact: false }).first()).toBeVisible();
@@ -46,3 +50,54 @@ for (const scenario of [
     await expect(page.getByText(scenario.evidence, { exact: true }).first()).toBeVisible();
   });
 }
+
+test("shows timed attacks, real alerts and sandbox containment", async ({ page }) => {
+  await signIn(page);
+  await page.getByRole("link", { name: "Live Showcase", exact: true }).click();
+  await page.getByLabel("Demo pace").selectOption("2");
+  await page.getByRole("button", { name: "Start live demo", exact: true }).click();
+  const attacks = page.getByRole("log", { name: "Attacker activity" });
+  const detection = page.getByRole("log", { name: "Detection engine" });
+  const responses = page.getByRole("log", { name: "System response" });
+  await expect(attacks.getByText("Valid account signs in", { exact: true })).toBeVisible();
+  await expect(detection.getByText("No alert required", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect(page.getByText("PAUSED · ready to explain")).toBeVisible();
+  const pausedStep = await page.getByText(/Step \d+ of 6/).innerText();
+  await page.waitForTimeout(2500);
+  await expect(page.getByText(pausedStep, { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Resume", exact: true }).click();
+  await expect(responses.getByText("Transfer blocked in sandbox", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(responses.getByText("Denied by existing containment", { exact: true })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("COMPLETE · evidence retained")).toBeVisible({ timeout: 10_000 });
+  if (process.env.SHOWCASE_SCREENSHOT) await page.screenshot({ path: process.env.SHOWCASE_SCREENSHOT, fullPage: true, animations: "disabled" });
+  const session = await page.locator("span").filter({ hasText: /^live-/ }).innerText();
+  await page.reload();
+  await expect(page.getByText(session, { exact: true })).toBeVisible();
+  await expect(page.getByText("Account: contained", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Presenter view" }).click();
+  await expect(page.locator("aside")).toBeHidden();
+  await page.getByRole("button", { name: "Exit presenter view" }).click();
+  await expect(page.locator("aside")).toBeVisible();
+});
+
+test("supports pause, manual steps and a fresh replay", async ({ page }) => {
+  await signIn(page);
+  await page.getByRole("link", { name: "Live Showcase", exact: true }).click();
+  await page.getByRole("button", { name: "Administrator abuse" }).click();
+  await page.getByRole("button", { name: "Start in step mode" }).click();
+  await expect(page.getByText("PAUSED · ready to explain")).toBeVisible();
+  await page.getByRole("button", { name: "Next step", exact: true }).click();
+  await expect(page.getByRole("log", { name: "Attacker activity" }).getByText("Administrator signs in", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Next step", exact: true }).click();
+  await expect(page.getByRole("log", { name: "Attacker activity" }).getByText("Approved privilege maintenance", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Next step", exact: true }).click();
+  await expect(page.getByRole("log", { name: "System response" }).getByText("Audit logging restored in sandbox", { exact: true })).toBeVisible();
+  const cursor = await page.getByText(/Step \d+ of 7/).innerText();
+  await page.waitForTimeout(2500);
+  await expect(page.getByText(cursor, { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Stop", exact: true }).click();
+  await page.getByRole("button", { name: "Start in step mode" }).click();
+  await expect(page.getByText("Step 0 of 7", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Stop", exact: true }).click();
+});

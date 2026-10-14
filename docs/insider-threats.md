@@ -2,7 +2,7 @@
 
 The control plane supports employee data misuse and privileged administrator misuse using explicit identity and access metadata. Existing decoy telemetry remains supported. The rules generate reviewable findings about account activity; they do not determine a person's intent or automatically contain an account.
 
-Run **Employee data misuse** or **Privileged administrator misuse** in Demo Lab. Both scenarios use synthetic accounts and resources, documentation-only IP addresses, and the real scoring and alert pipeline without external AI. Ordinary internal logins and approved privilege updates have score zero.
+Choose **Employee data misuse** or **Administrator abuse** in Live Showcase and start the live demo. Both scenarios use synthetic accounts and resources, documentation-only IP addresses, and the real scoring and alert pipeline without external AI. Ordinary internal logins and approved privilege updates have score zero.
 
 ## Collector contract
 
@@ -47,7 +47,7 @@ The strongest matching rule determines score and the primary MITRE tag; all rule
 
 Events and investigation timelines show account, role, resource and rule explanations. Filter **Events** by account ID, or use `GET /api/v1/events?actor_id=directory-account-001` to review that account across IPs and sessions. Alerts include identity metadata and recommendations to preserve audit evidence, verify business purpose and consider compromised credentials. Open-alert deduplication uses account and rule names rather than shared source IP; it retains the existing ten-minute window. Review Events for all occurrences.
 
-No database migration is required: context and assessments use the existing JSONB event data. Existing installations can deploy the updated backend and frontend together.
+Identity context and assessments use the existing JSONB event data. The live showcase additionally requires migration `0002_live_demo`, applied automatically by the Docker Compose backend startup. Deploy the updated backend and frontend together.
 
 ## Operational limits
 

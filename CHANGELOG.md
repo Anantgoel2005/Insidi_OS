@@ -1,6 +1,14 @@
 # Changelog
 
-All notable changes to Deception Orchestrator are documented here.
+All notable changes to Insidi_OS are documented here.
+
+## Unreleased
+
+- Rebrand the insider-threat version as Insidi_OS with a vector identity, redesigned login, consistent console navigation and API metadata.
+- Add a live showcase with timed attack, detection and sandbox-response feeds, presenter view, pause, stepping and replay.
+- Persist run state, response evidence and per-run alerts; add migration `0002_live_demo`.
+
+Earlier release history is inherited from Deception Orchestrator.
 
 ## 1.0.0 - 2026-08-11
 

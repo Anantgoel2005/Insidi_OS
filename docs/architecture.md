@@ -1,6 +1,6 @@
 # Architecture and trust boundaries
 
-Deception Orchestrator separates the internet-facing analyst control plane from optional decoys that run only inside an owned lab network.
+Insidi_OS separates the internet-facing analyst control plane from optional decoys that run only inside an owned lab network.
 
 ```mermaid
 flowchart LR

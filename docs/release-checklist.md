@@ -15,7 +15,7 @@ Use this checklist from a clean `main` checkout. Replace `v1.0.0` when preparing
 ## Publish
 
 ```bash
-git tag -s v1.0.0 -m "Deception Orchestrator v1.0.0"
+git tag -s v1.0.0 -m "Insidi_OS v1.0.0"
 git push origin v1.0.0
 ```
 

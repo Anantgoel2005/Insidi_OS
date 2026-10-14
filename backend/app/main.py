@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import asyncio
+from contextlib import suppress
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,23 +14,30 @@ from app.api.dependencies import csrf_tokens_match
 from app.config import settings
 from app.core.database import engine
 from app.core.rate_limit import rate_limiter
+from app.services.live_demo import run_scheduler
 
 logging.basicConfig(
     level=logging.DEBUG if settings.debug else logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
-logger = logging.getLogger("deception-orchestrator")
+logger = logging.getLogger("insidi-os")
 
 
 async def lifespan(app: FastAPI):
     settings.validate_runtime()
-    yield
-    await engine.dispose()
+    scheduler = asyncio.create_task(run_scheduler())
+    try:
+        yield
+    finally:
+        scheduler.cancel()
+        with suppress(asyncio.CancelledError):
+            await scheduler
+        await engine.dispose()
 
 
 app = FastAPI(
-    title="Deception Orchestrator",
-    description="Agentic AI deception platform — honeypots, canary tokens, and adaptive engagement",
+    title="Insidi_OS",
+    description="Identity-aware insider-threat detection, live attack walkthroughs and synthetic sandbox response",
     version="1.0.0",
     lifespan=lifespan,
 )

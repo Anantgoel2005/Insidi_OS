@@ -21,8 +21,8 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           mkdir dist
-          git archive --format=tar.gz --prefix="deception-orchestrator-${TAG}/" -o "dist/deception-orchestrator-${TAG}.tar.gz" "${TAG}"
-          git archive --format=zip --prefix="deception-orchestrator-${TAG}/" -o "dist/deception-orchestrator-${TAG}.zip" "${TAG}"
+          git archive --format=tar.gz --prefix="Insidi_OS-${TAG}/" -o "dist/Insidi_OS-${TAG}.tar.gz" "${TAG}"
+          git archive --format=zip --prefix="Insidi_OS-${TAG}/" -o "dist/Insidi_OS-${TAG}.zip" "${TAG}"
           cd dist
           sha256sum *.tar.gz *.zip > SHA256SUMS
       - name: Publish GitHub release
@@ -31,9 +31,9 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: >-
           gh release create "${TAG}"
-          dist/deception-orchestrator-${TAG}.tar.gz
-          dist/deception-orchestrator-${TAG}.zip
+          dist/Insidi_OS-${TAG}.tar.gz
+          dist/Insidi_OS-${TAG}.zip
           dist/SHA256SUMS
           --verify-tag
           --generate-notes
-          --title "Deception Orchestrator ${TAG}"
+          --title "Insidi_OS ${TAG}"

@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthGate } from "@/components/auth-gate";
+import { brand } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: "Deception Orchestrator",
-  description: "Secure deception operations console for SOC analysts",
+  title: { default: brand.name, template: `%s | ${brand.name}` },
+  applicationName: brand.name,
+  description: brand.description,
+  icons: { icon: "/icon.svg", shortcut: "/icon.svg" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

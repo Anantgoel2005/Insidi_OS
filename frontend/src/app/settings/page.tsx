@@ -6,7 +6,7 @@ export default function SettingsPage() {
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
         <p className="text-sm text-muted-foreground">
-          Configure the deception orchestrator
+          Configure Insidi_OS
         </p>
       </div>
 

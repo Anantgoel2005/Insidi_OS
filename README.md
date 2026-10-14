@@ -1,13 +1,17 @@
-# Insider Threat Orchestrator
+<img src="frontend/public/brand/insidi-mark.svg" width="64" alt="Insidi_OS mark" />
 
-[![CI](https://github.com/Anantgoel2005/insider-threat-orchestrator/actions/workflows/ci.yml/badge.svg)](https://github.com/Anantgoel2005/insider-threat-orchestrator/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/Anantgoel2005/insider-threat-orchestrator/actions/workflows/codeql.yml/badge.svg)](https://github.com/Anantgoel2005/insider-threat-orchestrator/actions/workflows/codeql.yml)
+# Insidi_OS
+
+**Identity. Deception. Response.**
+
+[![CI](https://github.com/Anantgoel2005/Insidi_OS/actions/workflows/ci.yml/badge.svg)](https://github.com/Anantgoel2005/Insidi_OS/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Anantgoel2005/Insidi_OS/actions/workflows/codeql.yml/badge.svg)](https://github.com/Anantgoel2005/Insidi_OS/actions/workflows/codeql.yml)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](backend/requirements.txt)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](frontend/package.json)
 
 > **A self-hostable analyst console for employee and administrator insider-threat investigations.**
 
-Insider Threat Orchestrator combines identity-aware telemetry with controlled decoy and canary activity to produce explainable alerts and investigation timelines for employee data misuse and privileged administrator abuse. It supports deterministic lab demonstrations without requiring a live attacker or an external LLM.
+Insidi_OS combines identity-aware telemetry with controlled decoy and canary activity to produce explainable alerts and investigation timelines for employee data misuse and privileged administrator abuse. It supports deterministic lab demonstrations without requiring a live attacker or an external LLM.
 
 This separate project builds on [Deception Orchestrator](https://github.com/Anantgoel2005/deception-orchestrator) and preserves its development history. See the [insider-threat guide](docs/insider-threats.md) for the new workflows and integration limits.
 
@@ -16,30 +20,30 @@ This separate project builds on [Deception Orchestrator](https://github.com/Anan
 > [!WARNING]
 > This is a defensive lab and portfolio project, not an internet-exposed honeypot platform. Run decoys only on systems and networks you own. The hosted control plane never needs Docker socket access.
 
-## See it in action
+## See it live
 
-![Animated walkthrough of the Deception Orchestrator analyst workflow](docs/assets/demo-walkthrough.gif)
+![Insidi_OS live attack, detection and response stage](docs/assets/live-showcase.png)
 
-| Analyst dashboard | MITRE-tagged investigation |
-| --- | --- |
-| ![Deception Orchestrator dashboard showing live attack telemetry](docs/assets/dashboard.png) | ![Attack investigation showing the deterministic credential-to-exfiltration timeline](docs/assets/investigation.png) |
-
-Both views above were captured from the bundled offline demo. The workflow generates safe TEST-NET telemetry, processes it through the production event pipeline, and opens the resulting investigation automatically.
+The live showcase generates synthetic actions over time, sends them through the real detection pipeline, and displays each finding and sandbox response alongside the attack. Pause, step forward, replay or use presenter view during a demonstration.
 
 ## What you can demonstrate
 
 | Capability | What it shows |
 | --- | --- |
 | **Protected analyst console** | Single-admin login, HttpOnly sessions, CSRF checks, rate limits, and deployment status. |
-| **Demo Lab** | A deterministic credential-to-exfiltration scenario using TEST-NET addresses. |
+| **Live Showcase** | A deterministic credential-to-exfiltration scenario using TEST-NET addresses. |
 | **Investigation workflow** | MITRE-tagged events, severity scoring, alert triage, and an ordered attack timeline. |
 | **URL canaries** | One-time beacon callbacks that generate a critical event and alert. |
 | **Local decoy lab** | Explicit, local-only Docker decoys with a separate log-monitor worker. |
 | **Optional AI enrichment** | DeepSeek can enrich analysis when configured; deterministic offline rules remain the default fallback. |
 | **Insider-threat findings** | Identity-aware rules for employee data misuse and privileged administrator abuse, with account filters and explainable evidence. |
 | **Insider demo scenarios** | Valid internal logins, decoy data access, bulk exports, unapproved transfers, audit disabling, and privilege changes. |
+| **Live showcase stage** | Timed attack, detection and response feeds; pause, step, replay, presenter view and persisted synthetic containment. |
 
-See the [insider-threat guide](docs/insider-threats.md) for collector metadata, detection thresholds, API examples and operational limits. Choose **Employee data misuse** or **Privileged administrator misuse** in Demo Lab to try the workflows.
+See the [insider-threat guide](docs/insider-threats.md) for collector metadata, detection thresholds, API examples and operational limits. Choose **Employee data misuse** or **Administrator abuse** in Live Showcase to try the workflows.
+
+For presentations, use **Live Showcase → Start live demo**. The [live showcase guide](docs/live-showcase.md) includes a suggested walkthrough and explains the boundary between real detection and synthetic containment.
+
 
 ## Architecture
 
@@ -95,11 +99,11 @@ LLM_MODEL=deepseek-v4-flash
 
 ## Demo flow
 
-1. Open **Demo Lab** and run the safe scenario.
-2. Review the generated credential attempts, successful access, command activity, exploit attempt, and canary trip in **Events**.
-3. Open the linked **Investigation** to follow the ordered attack timeline and MITRE context.
-4. In **Alerts**, acknowledge or resolve the high-confidence findings.
-5. In **Canaries**, generate a URL beacon, copy its callback URL, and fetch it once to trigger a critical alert.
+1. Open **Live Showcase**, select employee data misuse or administrator abuse, and click **Start live demo**.
+2. Watch actions, detection findings and synthetic sandbox responses arrive together. Use **Pause**, **Next step**, or **Presenter view** to explain each stage.
+3. Watch a containment decision change the outcome of a later synthetic retry.
+4. Open the linked **Investigation** for recorded evidence and MITRE context, then review the findings in **Alerts**.
+5. Replay with the other insider scenario. The instant investigation generator and URL canaries remain available for supplementary demonstrations.
 
 The scenario uses documentation-only TEST-NET addresses and follows the same event-processing path as the decoy and canary pipelines.
 

@@ -112,6 +112,24 @@ export interface ListResponse<T> {
   total: number;
 }
 
+export type DemoScenario = "employee-misuse" | "administrator-misuse" | "credential-to-exfiltration";
+export interface LiveStep {
+  index: number; title: string; narrative: string; event_id: string; event_type: string;
+  raw_log: string; actor_id: string; timestamp: string; score: number;
+  mitre_technique: string | null; mitre_tactic: string | null;
+  findings: { rule: string; reason: string; score: number }[];
+  alert: { id: string; title: string; severity: string; recommendation: string } | null;
+  responses: { code: string; title: string; detail: string; scope: string }[];
+  outcome: string; response_at: string; processing_ms: number; sandbox: LiveRun["sandbox"];
+}
+export interface LiveRun {
+  session_id: string; scenario: DemoScenario; status: "running" | "paused" | "completed" | "stopped";
+  cursor: number; total_steps: number; interval_seconds: number;
+  plan: { title: string; narrative: string }[]; steps: LiveStep[];
+  sandbox: { account_contained: boolean; egress_blocked: boolean; audit_enabled: boolean; privileges_locked: boolean; decoy_isolated: boolean; blocked_attempts: number };
+  created_at: string; next_step_at: string;
+}
+
 export const api = {
   auth: {
     login: (username: string, password: string) => request<{ username: string }>("/auth/login", { method: "POST", body: JSON.stringify({ username, password }) }),
@@ -169,5 +187,10 @@ export const api = {
       ),
   },
   investigations: { get: (sessionId: string) => request<Investigation>(`/investigations/${sessionId}`) },
-  demo: { run: (scenario = "credential-to-exfiltration") => request<{ session_id: string; events_created: number; message: string }>("/demo/run", { method: "POST", body: JSON.stringify({ scenario }) }) },
+  demo: {
+    run: (scenario = "credential-to-exfiltration") => request<{ session_id: string; events_created: number; message: string }>("/demo/run", { method: "POST", body: JSON.stringify({ scenario }) }),
+    startLive: (scenario: DemoScenario, interval_seconds: number, autoplay = true) => request<LiveRun>("/demo/live", { method: "POST", body: JSON.stringify({ scenario, interval_seconds, autoplay }) }),
+    live: (session: string) => request<LiveRun>(`/demo/live/${encodeURIComponent(session)}`),
+    control: (session: string, action: "pause" | "resume" | "step" | "stop" | "speed", expected_cursor: number, interval_seconds?: number) => request<LiveRun>(`/demo/live/${encodeURIComponent(session)}/control`, { method: "POST", body: JSON.stringify({ action, expected_cursor, interval_seconds }) }),
+  },
 };

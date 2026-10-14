@@ -4,24 +4,38 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 240 5% 90%;
-    --card: 240 10% 5.9%;
-    --card-foreground: 240 5% 90%;
-    --primary: 239 84% 67%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 5% 12%;
-    --secondary-foreground: 240 5% 90%;
-    --muted: 240 5% 10%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 240 5% 12%;
-    --accent-foreground: 240 5% 90%;
+    --background: 222 40% 5%;
+    --foreground: 210 40% 96%;
+    --card: 222 33% 8%;
+    --card-foreground: 210 40% 96%;
+    --primary: 188 86% 53%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 222 25% 12%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 222 25% 12%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 222 25% 12%;
+    --accent-foreground: 210 40% 96%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 5% 12%;
+    --border: 222 20% 17%;
   }
 }
 
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+html[data-presenter="true"] aside { display: none; }
+html[data-presenter="true"] main { padding: 1.5rem 2rem; }
+.showcase-feed { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+.showcase .text-slate-500 { color: #94a3b8; }
+.showcase-arrival { animation: showcase-arrival 400ms ease-out; }
+@keyframes showcase-arrival {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .showcase-arrival { animation: none; }
+  .showcase .animate-pulse { animation: none; }
 }

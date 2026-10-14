@@ -12,6 +12,7 @@ from app.api.endpoints import (
     events,
     honeypots,
     investigations,
+    live_demo,
 )
 
 api_router = APIRouter()
@@ -23,5 +24,6 @@ api_router.include_router(events.router, prefix="/events", tags=["Events"])
 api_router.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 api_router.include_router(engagement.router, prefix="/engagement", tags=["Engagement"])
-api_router.include_router(demo.router, prefix="/demo", tags=["Demo Lab"])
+api_router.include_router(demo.router, prefix="/demo", tags=["Live Showcase"])
+api_router.include_router(live_demo.router, prefix="/demo/live", tags=["Live Showcase"])
 api_router.include_router(investigations.router, prefix="/investigations", tags=["Investigations"])

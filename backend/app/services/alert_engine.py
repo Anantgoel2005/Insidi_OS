@@ -46,13 +46,15 @@ async def evaluate_event(db: AsyncSession, event: AttackEvent) -> Alert | None:
     recommendation = _get_recommendation(event)
 
     # Do not turn a noisy decoy into hundreds of identical open alerts.
-    recent = await db.scalar(
-        select(Alert).where(
+    recent_query = select(Alert).where(
             Alert.title == title,
             Alert.status.in_([AlertStatus.NEW, AlertStatus.ACKNOWLEDGED, AlertStatus.INVESTIGATING]),
             Alert.created_at >= datetime.now(timezone.utc) - timedelta(minutes=10),
-        ).limit(1)
-    )
+        )
+    if (event.parsed_data or {}).get("live_demo"):
+        # A replay gets its own findings, regardless of previous showcase alerts.
+        recent_query = recent_query.where(Alert.extra["demo_session_id"].astext == event.session_id)
+    recent = await db.scalar(recent_query.limit(1))
     if recent:
         return recent
 
@@ -69,6 +71,7 @@ async def evaluate_event(db: AsyncSession, event: AttackEvent) -> Alert | None:
             "mitre_technique": event.mitre_technique,
             "insider": insider,
             "insider_assessment": assessment if insider else None,
+            "demo_session_id": event.session_id if (event.parsed_data or {}).get("live_demo") else None,
         },
     )
     db.add(alert)

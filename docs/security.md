@@ -1,6 +1,6 @@
 # Security and responsible use
 
-Deception Orchestrator is designed for owned lab networks and defensive demonstrations. It does not execute captured commands, block traffic, or expose decoy services from the production control plane.
+Insidi_OS is designed for owned lab networks and defensive demonstrations. It does not execute captured commands, block traffic, or expose decoy services from the production control plane.
 
 - Production startup rejects missing admin password hashes, weak secrets, and non-HTTPS public URLs.
 - Production startup rejects plaintext admin passwords, wildcard CORS, invalid session lifetimes, and missing explicit origins.

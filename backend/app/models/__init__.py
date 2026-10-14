@@ -4,5 +4,6 @@ from app.models.alert import Alert
 from app.models.canary import CanaryToken
 from app.models.event import AttackEvent
 from app.models.honeypot import Honeypot
+from app.models.demo_run import DemoRun
 
-__all__ = ["Alert", "AttackEvent", "CanaryToken", "Honeypot"]
+__all__ = ["Alert", "AttackEvent", "CanaryToken", "Honeypot", "DemoRun"]

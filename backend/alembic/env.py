@@ -16,6 +16,7 @@ from app.models.honeypot import Honeypot
 from app.models.canary import CanaryToken
 from app.models.event import AttackEvent
 from app.models.alert import Alert
+from app.models.demo_run import DemoRun
 
 target_metadata = Base.metadata
 config.set_main_option("sqlalchemy.url", settings.database_url)
